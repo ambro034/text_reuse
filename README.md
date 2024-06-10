@@ -93,22 +93,24 @@ Where:
   - *str2* is the second string of text passed to the function
   - *l* is the minimum n-gram length the function is observing (i.e., l = 2, two-word chucks)
 
-### Style test
-
-Checks if the best practices and the right coding style has been used.
-
-    Give an example
-
-## Deployment
+### Examples
 
     # Load Data
     data = pd.read_csv(fake_data.csv, encoding='cp1252')
     data.info()
 
+    # Two Statements from Strings
+    s1 = "In this case, the public utilities commission shall consult with the energy commission in calculating market prices and establishing other renewable portfolio standard policies--for this is the right thing."
+    s2 = "The public utilities commission shall consult with the energy commission in establishing renewable portfolio standard policies, but this is the right thing."
+
+    id_reuse(s1,s2,2)
+
+    reuse_color_coded(s1,s2,2)
+
     # Construct Data
     mydata = tr.construct_dataset(data,0,1,2)
 
-    #Run Data
+    #Run Dataframe to Dataframe
     tr.reuse_dataset_to_dataset(mydata,0,2,1,2)
 
     
