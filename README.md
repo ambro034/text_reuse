@@ -13,27 +13,85 @@ for notes on deploying the project on a live system.
 
 All of the functions that are identified below can be installed and imported given the code below:
 
-Say what the step will be
-
     !pip install "git+https://github.com/ambro034/text_reuse.git"
     import text_reuse as tr
 
-And repeat
+## Practical Reuse Functions
 
-    until finished
+### reuse_color_coded
+This is a function returns two statements, color-coded based on their reuse; where, black text is 'reused' between the two statements, green text is 'added' between statement #1 and statement #2, and red text is 'terminated' between statement #1 and statement #2. Statement #1 is assumed to temporally proceed statement #2. 
 
-End with an example of getting some data out of the system or using it
-for a little demo
+    reuse_color_coded(str1,str2,l)
 
-## Running the tests
+Where:
+  - *str1* is the first string of text passed to the function
+  - *str2* is the second string of text passed to the function
+  - *l* is the minimum n-gram length the function is observing (i.e., l = 2, two-word chucks)
 
-Explain how to run the automated tests for this system
+### reuse_color_coded_dataset
+This is a function returns pairs of statements from a dataframe, color-coded based on their reuse; where, black text is 'reused' between the two statements, green text is 'added' between statement #1 and statement #2, and red text is 'terminated' between statement #1 and statement #2. Statement #1 is assumed to temporally proceed statement #2.
 
-### Sample Tests
+    reuse_color_coded_dataset(data,id,new_year,old_year,l)
 
-Explain what these tests test and why
+Where:
+  - *data* is the name of the dataframe
+  - *id* is the column position for Statement IDs in the dataframe
+  - *new_year* is the column position for Statement #1 in the dataframe
+  - *old_year* is the column position for Statement #2 in the dataframe
+  - *l* is the minimum n-gram length the function is observing (i.e., l = 2, two-word chucks)
 
-    Give an example
+### reuse_dataset_to_dataset
+This is a function returns pairs of statements from a dataframe, to a new dataframe representing the new statement, the added text, the reused test, the terminated text, and the old statement. For the added text, the reused test, the terminated text -- text is reported sequentially, so '[...]' are inserted where text is not sequentually relevent.
+
+    reuse_color_coded_dataset(data,id,new_year,old_year,l)
+
+Where:
+  - *data* is the name of the dataframe
+  - *id* is the column position for Statement IDs in the dataframe
+  - *new_year* is the column position for Statement #1 in the dataframe
+  - *old_year* is the column position for Statement #2 in the dataframe
+  - *l* is the minimum n-gram length the function is observing (i.e., l = 2, two-word chucks)
+
+
+## Data Construction
+
+A function to added with dataframe construction.
+
+### construct_dataset
+This is a function that takes a variably framed dataframe and conforms it to the structure useful in the above functions.
+
+    construct_dataset(data,id,new_year,old_year)
+
+Where:
+  - *data* is the name of the dataframe
+  - *id* is the column position for Statement IDs in the dataframe
+  - *new_year* is the column position for Statement #1 in the dataframe
+  - *old_year* is the column position for Statement #2 in the dataframe
+    
+
+## Additional Reuse Functions
+
+These functions are nested into the 'practical functions above, but can be used indamendently if needed.
+
+### id_reuse
+This is a function that identifies the longest stretch of words that are shared between to statements passed to the function. This function optimizes (i.e., finds the longest stretch of words), but does not return all reused words if there are two or more chuncks of text that are reused. 
+
+    id_reuse(str1,str2,l)
+
+Where:
+  - *str1* is the first string of text passed to the function
+  - *str2* is the second string of text passed to the function
+  - *l* is the minimum n-gram length the function is observing (i.e., l = 2, two-word chucks)
+
+### reuse_loops2
+This is a function that identifies all stretchs of words that are shared between to statements passed to the function. This function first optimizes (i.e., finds the longest stretch of words), loops through the text untill all text chuncks of size *l* are found. 
+
+    reuse_loops2(str1,str2,l)
+
+Where:
+  - *str1* is the first string of text passed to the function
+  - *str2* is the second string of text passed to the function
+  - *l* is the minimum n-gram length the function is observing (i.e., l = 2, two-word chucks)
 
 ### Style test
 
