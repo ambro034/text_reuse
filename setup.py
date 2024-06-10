@@ -7,7 +7,7 @@ setup(
   url = 'https://github.com/ambro034/text_reuse.git',
   author_name = 'Graham W. Ambrose',
   license = 'unlicense',
-  package = find_packages()
+  package = ['text_reuse']
   
 )
   
