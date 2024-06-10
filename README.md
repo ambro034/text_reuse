@@ -101,8 +101,17 @@ Checks if the best practices and the right coding style has been used.
 
 ## Deployment
 
-Add additional notes to deploy this on a live system
+    # Load Data
+    data = pd.read_csv(fake_data.csv, encoding='cp1252')
+    data.info()
 
+    # Construct Data
+    mydata = tr.construct_dataset(data,0,1,2)
+
+    #Run Data
+    tr.reuse_dataset_to_dataset(mydata,0,2,1,2)
+
+    
 ## Built With
 
   - [Contributor Covenant](https://www.contributor-covenant.org/) - Used
