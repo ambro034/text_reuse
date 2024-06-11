@@ -25,7 +25,7 @@ All of the functions that are identified below can be installed and imported giv
 
 ## Functions
 
-### Practical Reuse Functions
+## Practical Reuse Functions
 
 #### reuse_color_coded
 This is a function returns two statements, color-coded based on their reuse; where, black text is 'reused' between the two statements, green text is 'added' between statement #1 and statement #2, and red text is 'terminated' between statement #1 and statement #2. Statement #1 is assumed to temporally proceed statement #2. 
