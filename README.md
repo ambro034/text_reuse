@@ -95,6 +95,11 @@ Where:
 
 ### Examples
 
+    # Set Up
+    !pip install "git+https://github.com/ambro034/text_reuse.git"
+    import text_reuse as tr
+    import pandas as pd
+    
     # Load Data
     data = pd.read_csv(fake_data.csv, encoding='cp1252')
     data.info()
