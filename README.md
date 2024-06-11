@@ -10,11 +10,11 @@ These instructions will outline installation, a description of the functions, as
 # Table of Contents
 1. [Installing](#Installing)
 2. [Functions](#Functions)
-   1. [Practical Reuse Functions](#Practical Reuse Functions)
-   2. [Data Construction](#Data Construction)
-   3. [Additional Reuse Functions](#Additional Reuse Functions)
-4. [Examples](#Examples)
-5. [Other Stuff](#Built With)
+3. [Practical Reuse Functions](#Practical Reuse Functions)
+4. [Data Construction](#Data Construction)
+5. [Additional Reuse Functions](#Additional Reuse Functions)
+6. [Examples](#Examples)
+7. [Other Stuff](#Built With)
 
 ### Installing
 
