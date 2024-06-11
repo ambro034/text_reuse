@@ -10,11 +10,11 @@ These instructions will outline installation, a description of the functions, as
 # Table of Contents
 1. [Installing](#Installing)
 2. [Functions](#Functions)
-3. [Practical Reuse Functions](#Practical Reuse Functions)
-4. [Data Construction](#Data Construction)
-5. [Additional Reuse Functions](#Additional Reuse Functions)
-6. [Examples](#Examples)
-7. [Other Stuff](#Built With)
+   - [Practical Reuse Functions](#Practical-Reuse-Functions)
+   - [Data Construction](#Data-Construction)
+   - [Additional Reuse Functions](#Additional-Reuse-Functions)
+3. [Examples](#Examples)
+4. [Other Stuff](#Built-With)
 
 ### Installing
 
@@ -25,7 +25,7 @@ All of the functions that are identified below can be installed and imported giv
 
 ## Functions
 
-## Practical Reuse Functions
+### Practical Reuse Functions
 
 #### reuse_color_coded
 This is a function returns two statements, color-coded based on their reuse; where, black text is 'reused' between the two statements, green text is 'added' between statement #1 and statement #2, and red text is 'terminated' between statement #1 and statement #2. Statement #1 is assumed to temporally proceed statement #2. 
