@@ -173,10 +173,10 @@ def reuse_loops2(str1,str2,l):
   # Pre Processing
 
   m_str1 = str1.lower()
-  m_str1 = re.sub('([.,;!?()-])', r' \1', m_str1) #  !()-[]{};:'"\,<>./?@#$%^&*_~
+  m_str1 = re.sub('([a-zA-Z.,;!?()-])([.,;!?()-])', r'\1 \2', m_str1) #  !()-[]{};:'"\,<>./?@#$%^&*_~
   m_str1 = re.sub('([.,;!?()-])([a-zA-Z])', r'\1 \2', m_str1)
   m_str2 = str2.lower()
-  m_str2 = re.sub('([.,;!?()-])', r' \1', m_str2)
+  m_str2 = re.sub('([a-zA-Z.,;!?()-])([.,;!?()-])', r'\1 \2', m_str2)
   m_str2 = re.sub('([.,;!?()-])([a-zA-Z])', r'\1 \2', m_str2)
 
   ##################
@@ -223,8 +223,14 @@ def reuse_loops2(str1,str2,l):
     # Additional Splits
     s = -1
     for s in range(round(int((len(m_str1.split()))/(l)),0)):
-      s+=1
+
+      #print('####')
       #print(s)
+      #print(new_str)
+      #print(old_str)
+
+      s+=1
+
       for x in range(len(new_str)):
         if new_str[x][1] != 'black':
           for y in range(len(old_str)):
@@ -242,37 +248,44 @@ def reuse_loops2(str1,str2,l):
 
                 # split phrases string #1
                 g = x
-                m_str_1_a = new_str[x][0]
-                new_str.pop(x)
+                #print('g is:', g)
+                m_str_1_a = new_str[g][0]
+                #print(new_str[g][0])
+                #print(m_str_1_a.split(reuse_a))
+                new_str.pop(g)
 
                 try:
                   str1_pre = m_str_1_a.split(reuse_a)[0]
+                  #print(g, (str1_pre, 'green'))
                   new_str.insert(g,(str1_pre, 'green'))
                 except IndexError:
                   False
                 new_str.insert(g+1,(reuse_a,'black'))
+                #print(g+1, (reuse_a,'black'))
                 try:
                   str1_post = m_str_1_a.split(reuse_a)[1]
                   new_str.insert(g+2,(str1_post, 'green'))
+                  #print(g+2, (str1_post, 'green'))
                 except IndexError:
                   False
 
                 #print(new_str)
 
                 # split phrases string #2
-                g = x
-                m_str_2_a = old_str[x][0]
-                old_str.pop(x)
+                w = y
+                #print('w is:', w)
+                m_str_2_a = old_str[w][0]
+                old_str.pop(w)
 
                 try:
                   str2_pre = m_str_2_a.split(reuse_a)[0]
-                  old_str.insert(g,(str2_pre, 'red'))
+                  old_str.insert(w,(str2_pre, 'red'))
                 except IndexError:
                   False
-                old_str.insert(g+1,(reuse_a,'black'))
+                old_str.insert(w+1,(reuse_a,'black'))
                 try:
                   str2_post = m_str_2_a.split(reuse_a)[1]
-                  old_str.insert(g+2,(str2_post, 'red'))
+                  old_str.insert(w+2,(str2_post, 'red'))
                 except IndexError:
                   False
 
@@ -281,13 +294,14 @@ def reuse_loops2(str1,str2,l):
   else:
     new_str = []
     new_str.append((m_str1, 'green'))
-    
+
     old_str = []
     old_str.append((m_str2, 'red'))
 
 
   #####################
   return new_str, old_str
+
 
   
 ################
