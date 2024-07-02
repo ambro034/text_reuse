@@ -1,7 +1,7 @@
 # text_reuse
 ## Python functions for evaluating the reuse of text.
 
-One Paragraph of the project description
+This package evaluates the differences between two policy statements returning the statements data inline with the conceptualization of policy evolution in Ambrose et al., 2024.  Given this conceptualization, policy evolution observed in text can be (1) reused (i.e., no change observed between documents {black output text}), (2) added (i.e., added text observed between documents {green output text}), or (3) terminated (i.e., removed text observed between documents {red output text}). While this can happen at the whole statement level, it can also be observed as calibration or intra-statement changes. text_reuse is capable of evaluating evolution at the statement and intra-statement levels. 
 
 ## Getting Started
 
