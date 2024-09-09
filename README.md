@@ -88,7 +88,9 @@ Where:
   - *thresh* is the minimum threshold for jaccard similarity calculations the function will consider when making matches
 
 #### merge_over_time
-Given that the above functions only offer comparisons between two iterations of the policy, this function flexible merges multiple datasets allowing for nonsymetrical additions and terminations over multiple iterations. The datasets passed to the function must have one overlapping iteration of the policy that can be used to bridge the two datasets.
+Given that the above functions only offer comparisons between two iterations of the policy, this function flexible merges multiple datasets allowing for nonsymetrical additions and terminations over multiple iterations. The datasets passed to the function must have one overlapping iteration of the policy that can be used to bridge the two datasets. 
+
+*The funciton is built to start with the newest comparisons adding order comparisons with each iteration of the function*
 
     merge_over_time(new_df,old_df):
 
