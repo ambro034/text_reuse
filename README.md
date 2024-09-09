@@ -11,6 +11,7 @@ These instructions will outline installation, a description of the functions, as
 1. [Installing](#Installing)
 2. [Functions](#Functions)
    - [Practical Reuse Functions](#Practical-Reuse-Functions)
+   - [Reuse Matching Functions](#Reuse-Matching-Functions)
    - [Data Construction](#Data-Construction)
    - [Additional Reuse Functions](#Additional-Reuse-Functions)
 3. [Examples](#Examples)
@@ -61,6 +62,39 @@ Where:
   - *old_year* is the column position for Statement #2 in the dataframe
   - *l* is the minimum n-gram length the function is observing (i.e., l = 2, two-word chucks)
 
+
+### Reuse Matching Functions
+
+#### text_over_time
+This is a function that returns pairs of statements from two lists or strings, to a new dataframe. This dataframe represents a best fit predicition of evolution overtime, first identifying exact matches between the two inputs offered, then looking for best matches (using jaccard similarity) positionally constrained by the sorrounding statements. The output represents the new statement, the added text, the reused test, the terminated text, and the old statement. For the added text, the reused test, the terminated text -- text is reported sequentially, so '[...]' are inserted where text is not sequentually relevent. The function also returns the word counts for each of the items identified above as well as the jaccard similarity calculation for each pair.
+
+    text_over_time(new_year,old_year,l,thresh):
+
+Where:
+  - *str1* is the first string of text passed to the function
+  - *str2* is the second string of text passed to the function
+  - *l* is the minimum n-gram length the function is observing (i.e., l = 2, two-word chucks)
+  - *thresh* is the minimum threshold for jaccard similarity calculations the function will consider when making matches
+
+#### text_only_over_time
+This is a function that returns pairs of statements from two lists or strings, to a new dataframe. This dataframe represents a best fit predicition of evolution overtime, first identifying exact matches between the two inputs offered, then looking for best matches (using jaccard similarity) positionally constrained by the sorrounding statements. The output represents the new statement, the added text, the reused test, the terminated text, and the old statement. For the added text, the reused test, the terminated text -- text is reported sequentially, so '[...]' are inserted where text is not sequentually relevent.
+
+    text_over_time(new_year,old_year,l,thresh):
+
+Where:
+  - *str1* is the first string of text passed to the function
+  - *str2* is the second string of text passed to the function
+  - *l* is the minimum n-gram length the function is observing (i.e., l = 2, two-word chucks)
+  - *thresh* is the minimum threshold for jaccard similarity calculations the function will consider when making matches
+
+#### merge_over_time
+Given that the above functions only offer comparisons between two iterations of the policy, this function flexible merges multiple datasets allowing for nonsymetrical additions and terminations over multiple iterations. The datasets passed to the function must have one overlapping iteration of the policy that can be used to bridge the two datasets.
+
+    merge_over_time(new_df,old_df):
+
+Where:
+  - *new_df* is the 'newer' comparison to passed to the function
+  - *old_df* is the 'older' comparison to passed to the function
 
 ### Data Construction
 
