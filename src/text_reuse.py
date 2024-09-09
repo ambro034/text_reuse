@@ -395,3 +395,452 @@ def construct_dataset(data,id,new_year,old_year): # data to load, position of th
   dataset['Old_Year']=data.iloc[:, old_year].apply(str)
 
   return dataset[['Statement ID','New_Year','Old_Year']]
+
+
+
+### IDENTIFY SENTENCES ###
+
+# -*- coding: utf-8 -*-
+import re
+alphabets= "([A-Za-z])"
+prefixes = "(Mr|St|Mrs|Ms|Dr)[.]"
+suffixes = "(Inc|Ltd|Jr|Sr|Co)"
+starters = "(Mr|Mrs|Ms|Dr|Prof|Capt|Cpt|Lt|He\s|She\s|It\s|They\s|Their\s|Our\s|We\s|But\s|However\s|That\s|This\s|Wherever)"
+acronyms = "([A-Z][.][A-Z][.](?:[A-Z][.])?)"
+websites = "[.](com|net|org|io|gov|edu|me)"
+digits = "([0-9])"
+multiple_dots = r'\.{2,}'
+
+def split_into_sentences(text: str) -> list[str]:
+    """
+    Split the text into sentences.
+
+    If the text contains substrings "<prd>" or "<stop>", they would lead
+    to incorrect splitting because they are used as markers for splitting.
+
+    :param text: text to be split into sentences
+    :type text: str
+
+    :return: list of sentences
+    :rtype: list[str]
+    """
+    text = " " + text + "  "
+    text = text.replace("\n"," ")
+    text = re.sub(prefixes,"\\1<prd>",text)
+    text = re.sub(websites,"<prd>\\1",text)
+    text = re.sub(digits + "[.]" + digits,"\\1<prd>\\2",text)
+    text = re.sub(multiple_dots, lambda match: "<prd>" * len(match.group(0)) + "<stop>", text)
+    if "Ph.D" in text: text = text.replace("Ph.D.","Ph<prd>D<prd>")
+    text = re.sub("\s" + alphabets + "[.] "," \\1<prd> ",text)
+    text = re.sub(acronyms+" "+starters,"\\1<stop> \\2",text)
+    text = re.sub(alphabets + "[.]" + alphabets + "[.]" + alphabets + "[.]","\\1<prd>\\2<prd>\\3<prd>",text)
+    text = re.sub(alphabets + "[.]" + alphabets + "[.]","\\1<prd>\\2<prd>",text)
+    text = re.sub(" "+suffixes+"[.] "+starters," \\1<stop> \\2",text)
+    text = re.sub(" "+suffixes+"[.]"," \\1<prd>",text)
+    text = re.sub(" " + alphabets + "[.]"," \\1<prd>",text)
+    if "”" in text: text = text.replace(".”","”.")
+    if "\"" in text: text = text.replace(".\"","\".")
+    if "!" in text: text = text.replace("!\"","\"!")
+    if "?" in text: text = text.replace("?\"","\"?")
+    text = text.replace(".",".<stop>")
+    text = text.replace("?","?<stop>")
+    text = text.replace("!","!<stop>")
+    text = text.replace("<prd>",".")
+    sentences = text.split("<stop>")
+    sentences = [s.strip() for s in sentences]
+    if sentences and not sentences[-1]: sentences = sentences[:-1]
+    return sentences
+
+### TEXT STRINGS TO DATAFRAME ###
+
+def reuse_lists_to_dataset(new_year,old_year,l):
+
+  clean_data = pd.DataFrame(columns = ['New ID','New_Text','New_Text_WC','Added','Added_WC', 'Reused', 'Reused_WC', 'Terminated', 'Terminated_WC', 'Old ID', 'Old_Text', 'Old_Text_WC', 'Ratio_of_Match_IN_NEW', 'Ratio_of_Match_FROM_OLD','Jaccard_Similarity'])
+
+# converst to a list of sentences if not already a list
+  if isinstance(new_year, list):
+    new_year = new_year
+  elif isinstance(new_year, str):
+    new_year = split_into_sentences(new_year)
+
+  if isinstance(old_year, list):
+    old_year = old_year
+  elif isinstance(old_year, str):
+    old_year = split_into_sentences(old_year)
+
+  new_year.append(" ")
+  old_year.append(" ")
+
+  for x in range(len(new_year)):
+    id_new = x
+    new = new_year[x]
+    for y in range(len(old_year)):
+      id_old = y
+      old = old_year[y]
+
+      new_str, old_str = reuse_loops2(new,old,l)
+
+      added = ""
+      added2 = ""
+      reuse = ""
+      reuse2 = ""
+      removed = ""
+      removed2 = ""
+
+      # Reused text
+
+      for t in range(len(new_str)):
+        if new_str[t][1] != 'black':
+          if added != "":
+            added = " ".join([added, "[...]"])
+          added = " ".join([added, new_str[t][0]])
+          added2 = " ".join([added2, new_str[t][0]])
+        else:
+          if reuse != "":
+            reuse = " ".join([reuse, "[...]"])
+          reuse = " ".join([reuse, new_str[t][0]])
+          reuse2 = " ".join([reuse2, new_str[t][0]])
+
+      for w in range(len(old_str)):
+        if old_str[w][1] != 'black':
+          if removed != "":
+            removed = " ".join([removed, "[...]"])
+          removed = " ".join([removed, old_str[w][0]])
+          removed2 = " ".join([removed2, old_str[w][0]])
+
+        # Counts
+
+      if new != "" and new != "nan":
+        new_wc = len(re.findall(r'\w+', new))
+      else:
+        new_wc = 0
+
+      if added2 != "" and added2 != "nan":
+        added_wc = len(re.findall(r'\w+', added2))
+      else:
+        added_wc = 0
+
+      if reuse2 != "" and reuse2 != "nan":
+        reuse_wc = len(re.findall(r'\w+', reuse2))
+      else:
+        reuse_wc = 0
+
+      if removed2 != "" and removed2 != "nan":
+        removed_wc = len(re.findall(r'\w+', removed2))
+      else:
+        removed_wc = 0
+
+      if old != "" and old != "nan":
+        old_wc = len(re.findall(r'\w+', old))
+      else:
+        old_wc = 0
+
+      # Reuse Calculations
+
+      if new_wc != 0:
+        rom_new = reuse_wc/new_wc
+      else:
+        rom_new = 0
+      if old_wc != 0:
+        rom_old = reuse_wc/old_wc
+      else:
+        rom_old = 0
+
+      if new_wc == 0 and old_wc == 0 :
+        jac_sim = 0
+      else:
+        jac_sim = reuse_wc/(new_wc + old_wc)
+
+
+      clean_data = clean_data._append({'New ID':id_new,'New_Text':new,'New_Text_WC': new_wc,'Added':added,'Added_WC': added_wc, 'Reused':reuse,'Reused_WC': reuse_wc, 'Terminated':removed,'Terminated_WC': removed_wc, 'Old ID':id_old, 'Old_Text':old, 'Old_Text_WC': old_wc, 'Ratio_of_Match_IN_NEW': rom_new, 'Ratio_of_Match_FROM_OLD': rom_old,'Jaccard_Similarity': jac_sim},ignore_index=True)
+  return clean_data
+
+### TEXT OVER TIME ###
+
+def text_over_time(new_year,old_year,l,thresh):
+  dataframe = reuse_lists_to_dataset(new_year,old_year,l)
+
+  t_new = dataframe['New ID'].max()
+  t_old = dataframe['Old ID'].max()
+
+  best_matches = pd.DataFrame(data = None, columns= dataframe.columns)
+  matches = pd.DataFrame(data = None, columns= best_matches.columns)
+
+  perfect_match = dataframe.loc[dataframe['Jaccard_Similarity'] == 0.5]
+  #print(perfect_match)
+
+  observed_new = list(perfect_match['New ID'])
+  #print(observed_new)
+
+  observed_old = list(perfect_match['Old ID'])
+  #print(observed_old)
+
+  # Best Match
+  num_bm = 0
+  for x in range(t_new):
+    if x not in observed_new:
+      new_lower = 0
+      new_upper = t_new
+      for y in range(x+1):
+        l = (x-y)
+        if l in observed_new:
+          new_lower = l
+          break
+
+        for z in range((t_new+1)-x):
+          u = (x+z)
+          if u in observed_new:
+            new_upper = u
+            break
+
+      if new_lower in observed_new:
+        old_lower = perfect_match.loc[perfect_match['New ID'] == new_lower, 'Old ID'].iloc[0]
+      else:
+        old_lower = 0
+
+      if new_upper in observed_new:
+        old_upper = perfect_match.loc[perfect_match['New ID'] == new_upper, 'Old ID'].iloc[0]
+      else:
+        old_upper = t_old
+
+      #print('new_lower: ', new_lower)
+      #print('new_upper: ', new_upper)
+      #print('old_lower: ', old_lower)
+      #print('old_upper: ', old_upper)
+
+      best_match = dataframe.loc[(dataframe['New ID'] == x) &
+       (dataframe['Old ID'] > int(old_lower)) &
+        (dataframe['Old ID'] < int(old_upper)) &
+         (dataframe['Jaccard_Similarity'] > float(thresh))]
+
+      if len(best_match) > 0:
+        num_bm = num_bm + 1
+        #print(num_bm)
+        best_matches = pd.concat([best_matches, best_match])
+
+  best_matches['Jaccard_Similarity'] = best_matches['Jaccard_Similarity'].astype(float)
+
+  for q in range(num_bm):
+    if len(best_matches) == 0:
+      break
+    else:
+      bJS = best_matches['Jaccard_Similarity'].max()
+      best_row = dataframe.loc[(dataframe['Jaccard_Similarity'] == bJS)]
+      perfect_match = pd.concat([perfect_match, best_row])
+
+      best_matches = best_matches.loc[(best_matches['New ID'] != best_row.iloc[0]['New ID'])]
+      observed_new.append(best_row.iloc[0]['New ID'])
+      #print(observed_new)
+
+      best_matches = best_matches.loc[(best_matches['Old ID'] != best_row.iloc[0]['Old ID'])]
+      observed_old.append(best_row.iloc[0]['Old ID'])
+      #print(observed_old)
+
+  # Added and Terminated
+
+  no_match = dataframe.loc[(~dataframe['New ID'].isin(observed_new)) & (dataframe['Old_Text_WC'] == 0) & (dataframe['New_Text_WC'] != 0 )]
+  perfect_match = pd.concat([perfect_match, no_match])
+  no_match = dataframe.loc[(~dataframe['Old ID'].isin(observed_old)) & (dataframe['New_Text_WC'] == 0) & (dataframe['Old_Text_WC'] != 0 )]
+  perfect_match = pd.concat([perfect_match, no_match])
+
+  perfect_match.loc[(perfect_match['New_Text_WC'] == 0), "New ID"] = None
+  perfect_match.loc[(perfect_match['Old_Text_WC'] == 0), "Old ID"] = None
+  perfect_match = perfect_match.assign(order_new=perfect_match['New ID'])
+  perfect_match = perfect_match.assign(order_old=perfect_match['Old ID'])
+
+  perfect_match = perfect_match.reset_index(drop=True)
+
+  for b in range(len(perfect_match)):
+    if perfect_match['order_new'].iloc[b] == None:
+      num = perfect_match['order_old'].iloc[b] - 1
+      index = perfect_match.index[perfect_match.order_old == num][0]
+      perfect_match.at[b, 'order_new'] = perfect_match['order_new'].iloc[index]
+
+  for g in range(len(perfect_match)):
+    if perfect_match['order_old'].iloc[g] == None:
+      num = perfect_match['order_new'].iloc[g] - 1
+      index = perfect_match.index[perfect_match.order_new == num][0]
+      perfect_match.at[g, 'order_old'] = perfect_match['order_old'].iloc[index]
+
+  perfect_match['order'] = perfect_match['order_new'] + perfect_match['order_old']
+
+  # Sort
+  perfect_match = perfect_match.sort_values(by=['order']) #.sort_values(by=['Old ID'])
+
+  perfect_match = perfect_match.reset_index(drop=True)
+
+  return perfect_match
+
+
+### TEXT ONLY OVER TIME ###
+
+def text_only_over_time(new_year,old_year,l,thresh):
+  dataframe = reuse_lists_to_dataset(new_year,old_year,l)
+
+  t_new = dataframe['New ID'].max()
+  t_old = dataframe['Old ID'].max()
+
+  best_matches = pd.DataFrame(data = None, columns= dataframe.columns)
+  matches = pd.DataFrame(data = None, columns= best_matches.columns)
+
+  perfect_match = dataframe.loc[dataframe['Jaccard_Similarity'] == 0.5]
+  #print(perfect_match)
+
+  observed_new = list(perfect_match['New ID'])
+  #print(observed_new)
+
+  observed_old = list(perfect_match['Old ID'])
+  #print(observed_old)
+
+  # Best Match
+  num_bm = 0
+  for x in range(t_new):
+    if x not in observed_new:
+      new_lower = 0
+      new_upper = t_new
+      for y in range(x+1):
+        l = (x-y)
+        if l in observed_new:
+          new_lower = l
+          break
+
+        for z in range((t_new+1)-x):
+          u = (x+z)
+          if u in observed_new:
+            new_upper = u
+            break
+
+      if new_lower in observed_new:
+        old_lower = perfect_match.loc[perfect_match['New ID'] == new_lower, 'Old ID'].iloc[0]
+      else:
+        old_lower = 0
+
+      if new_upper in observed_new:
+        old_upper = perfect_match.loc[perfect_match['New ID'] == new_upper, 'Old ID'].iloc[0]
+      else:
+        old_upper = t_old
+
+      #print('new_lower: ', new_lower)
+      #print('new_upper: ', new_upper)
+      #print('old_lower: ', old_lower)
+      #print('old_upper: ', old_upper)
+
+      best_match = dataframe.loc[(dataframe['New ID'] == x) &
+       (dataframe['Old ID'] > int(old_lower)) &
+        (dataframe['Old ID'] < int(old_upper)) &
+         (dataframe['Jaccard_Similarity'] > float(thresh))]
+
+      if len(best_match) > 0:
+        num_bm = num_bm + 1
+        best_matches = pd.concat([best_matches, best_match])
+
+  best_matches['Jaccard_Similarity'] = best_matches['Jaccard_Similarity'].astype(float)
+
+  for q in range(num_bm):
+    bJS = best_matches['Jaccard_Similarity'].max()
+    best_row = dataframe.loc[(dataframe['Jaccard_Similarity'] == bJS)]
+    perfect_match = pd.concat([perfect_match, best_row])
+
+    best_matches = best_matches.loc[(best_matches['New ID'] != best_row.iloc[0]['New ID'])]
+    observed_new.append(best_row.iloc[0]['New ID'])
+    #print(observed_new)
+
+    best_matches = best_matches.loc[(best_matches['Old ID'] != best_row.iloc[0]['Old ID'])]
+    observed_old.append(best_row.iloc[0]['Old ID'])
+    #print(observed_old)
+
+  # Added and Terminated
+
+
+  no_match = dataframe.loc[(~dataframe['New ID'].isin(observed_new)) & (dataframe['Old_Text_WC'] == 0) & (dataframe['New_Text_WC'] != 0 )]
+  perfect_match = pd.concat([perfect_match, no_match])
+  no_match = dataframe.loc[(~dataframe['Old ID'].isin(observed_old)) & (dataframe['New_Text_WC'] == 0) & (dataframe['Old_Text_WC'] != 0 )]
+  perfect_match = pd.concat([perfect_match, no_match])
+
+  perfect_match.loc[(perfect_match['New_Text_WC'] == 0), "New ID"] = None
+  perfect_match.loc[(perfect_match['Old_Text_WC'] == 0), "Old ID"] = None
+  perfect_match = perfect_match.assign(order_new=perfect_match['New ID'])
+  perfect_match = perfect_match.assign(order_old=perfect_match['Old ID'])
+
+  perfect_match = perfect_match.reset_index(drop=True)
+
+  for b in range(len(perfect_match)):
+    if perfect_match['order_new'].iloc[b] == None:
+      num = perfect_match['order_old'].iloc[b] - 1
+      index = perfect_match.index[perfect_match.order_old == num][0]
+      perfect_match.at[b, 'order_new'] = perfect_match['order_new'].iloc[index]
+
+  for g in range(len(perfect_match)):
+    if perfect_match['order_old'].iloc[g] == None:
+      num = perfect_match['order_new'].iloc[g] - 1
+      index = perfect_match.index[perfect_match.order_new == num][0]
+      perfect_match.at[g, 'order_old'] = perfect_match['order_old'].iloc[index]
+
+  perfect_match['order'] = perfect_match['order_new'] + perfect_match['order_old']
+
+
+  # Sort
+  perfect_match = perfect_match.sort_values(by=['order']) #.sort_values(by=['Old ID'])
+
+  perfect_match = perfect_match.loc[:,['New ID', 'New_Text','Added', 'Reused','Terminated','Old ID','Old_Text']]
+
+  perfect_match = perfect_match.reset_index(drop=True)
+
+  return perfect_match
+
+### MERGE DATAFRAMES ###
+
+def merge_over_time(new_df,old_df):
+
+  if len(new_df.columns) != len(old_df.columns):
+    print("Error: input dataframes are not the same size")
+    print("new_df: ", len(new_df.columns), "columns")
+    print("old_df: ", len(old_df.columns), "columns")
+    return None
+
+  else:
+
+    if len(new_df.columns) == 7:
+      old_position = 12
+    else:
+      old_position = 27
+
+    matched_df = pd.DataFrame(data = None, columns= [])
+    empty = pd.DataFrame(data = None, columns= new_df.columns)
+    old_ID2 = list(old_df['Old ID'])
+    #print(old_ID2)
+    for x in range(len(new_df)):
+      ID1 = new_df['Old ID'].iloc[x]
+      #print(ID1)
+      if isinstance(ID1, int):
+        df1 = new_df.loc[(new_df['Old ID'] == ID1)].reset_index(drop=True)
+        df2 = old_df.loc[(old_df['New ID'] == ID1)].reset_index(drop=True)
+        matched = pd.concat([df1, df2], axis=1)
+        matched_df =  pd.concat([matched_df, matched])
+        index = old_df.index[old_df['New ID'] == ID1][0]
+        index2 = old_df.iloc[index]['Old ID']
+        old_ID2.remove(index2)
+
+      else:
+        df1 = new_df.loc[(new_df.index.isin([x]))].reset_index(drop=True)
+        matched = pd.concat([df1,empty], axis=1)
+        matched_df = pd.concat([matched_df, matched])
+        matched_df.reset_index(drop=True)
+      if len(old_ID2) != 0:
+        #print(matched_df.iloc[x][old_position])
+        if matched_df.iloc[x,old_position] > min(old_ID2):
+          nones = [l for l in old_ID2 if l < matched_df.iloc[x,old_position]]
+          for n in nones:
+            df2 = old_df.loc[(old_df['Old ID'] == n)].reset_index(drop=True)
+            matched = pd.concat([empty,df2], axis=1)
+            first_matched_df = matched_df.iloc[:-1 , :]
+            last_matched_df = matched_df.iloc[-1: , :]
+            matched_df =  pd.concat([first_matched_df, matched, last_matched_df])
+            matched_df.reset_index(drop=True, inplace=True)
+            old_ID2.remove(n)
+            #print(old_ID2)
+
+
+  matched_df.reset_index(drop=True, inplace=True)
+  return matched_df
+
