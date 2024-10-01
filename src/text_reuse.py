@@ -974,4 +974,5 @@ def data_from_GD(file_name,tab_name):
   # Reset the index (optional)
   df_name.reset_index(drop=True, inplace=True)
 
-  return(df_name)
+  return df_name
+  
