@@ -5,6 +5,8 @@ from IPython.display import display
 
 import re
 
+import numpy as np
+
 ###################
 ### Definitions ###
 ###################
