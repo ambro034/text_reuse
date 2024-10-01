@@ -963,8 +963,6 @@ def data_from_GD(file_name,tab_name):
   # get_all_values gives a list of rows.
   rows = worksheet.get_all_values()
 
-  df_name = tab_name.replace(" ", "_")
-
   import pandas as pd
   df_name = pd.DataFrame.from_records(rows)
 
