@@ -450,7 +450,7 @@ def reuse_dataset_to_dataset(data,id,new_year,old_year,l):
 
 ### Dataset Construction ###
 
-def construct_dataset(data,id,new_year,new_year_num,old_year,old_year_num): # data to load, position of the id column, position of the new_year column, year of the new_year column, position of the old_year column, year of the old_year column
+def construct_dataset(data,id,new_year,new_year_num,old_year,old_year_num): # data to load, position of the id column, position of the new_year column, position of the old_year column
 
   nyn = 'y_'+ str(new_year_num)
   oyn = 'y_'+ str(old_year_num)
@@ -458,10 +458,17 @@ def construct_dataset(data,id,new_year,new_year_num,old_year,old_year_num): # da
   dataset = pd.DataFrame({'Statement ID' : [],
                          nyn : [],
                          oyn : []})
+  
+  if id != False:
 
-  dataset['Statement ID']=data.iloc[:, id].apply(int)
-  dataset[nyn]=data.iloc[:, new_year].apply(str)
-  dataset[oyn]=data.iloc[:, old_year].apply(str)
+    dataset['Statement ID']=data.iloc[:, id].apply(int)
+    dataset[nyn]=data.iloc[:, new_year].apply(str)
+    dataset[oyn]=data.iloc[:, old_year].apply(str)
+  
+  else:
+    dataset['Statement ID']= range(len(data))
+    dataset[nyn]=data.iloc[:, new_year].apply(str)
+    dataset[oyn]=data.iloc[:, old_year].apply(str)
 
   return dataset[['Statement ID',nyn,oyn]]
 
