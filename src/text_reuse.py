@@ -942,3 +942,24 @@ def straight_merge_text_only(new_df,old_df):
   matched_df = small_new_df.join(small_old_df, lsuffix=n_suf, rsuffix=o_suf)
 
   return matched_df
+  
+### UPLOAD FROM GOOGLE DRIVE ####
+
+def data_from_GD(file_name,tab_name):
+  worksheet = gc.open(file_name).worksheet(tab_name)
+
+  # get_all_values gives a list of rows.
+  rows = worksheet.get_all_values()
+
+  df_name = tab_name.replace(" ", "_")
+
+  import pandas as pd
+  df_name = pd.DataFrame.from_records(rows)
+
+  df_name.columns = df_name.iloc[0]  # Set the first row as header
+  df_name = df_name[1:]  # Remove the first row from the data
+
+  # Reset the index (optional)
+  df_name.reset_index(drop=True, inplace=True)
+
+  return(df_name)
