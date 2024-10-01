@@ -345,7 +345,19 @@ def reuse_color_coded_dataset(data,id,new_year,old_year,l):
 
 def reuse_dataset_to_dataset(data,id,new_year,old_year,l):
 
-  clean_data = pd.DataFrame(columns = ['Statement ID','New_Text','Added', 'Reused', 'Terminated', 'Old_Text'])
+  ny = data.columns[new_year]
+  oy = data.columns[old_year]
+
+  nt = ny+'_Text'
+  ntw = ny+'_Text_WC'
+
+  ot = oy+'_Text'
+  otw = oy+'_Text_WC'
+
+  rmnt = 'Ratio_of_Match_'+ny
+  rmot = 'Ratio_of_Match_'+oy
+
+  clean_data = pd.DataFrame(columns = ['Statement ID',nt,ntw,'Added','Added_WC', 'Reused', 'Reused_WC', 'Terminated', 'Terminated_WC', ot, otw, rmnt, rmot,'Jaccard_Similarity'])
 
   for x in range(len(data)):
 
@@ -356,26 +368,78 @@ def reuse_dataset_to_dataset(data,id,new_year,old_year,l):
     new_str, old_str = reuse_loops2(new,old,l)
 
     added = ""
+    added2 = ""
     reuse = ""
+    reuse2 = ""
     removed = ""
+    removed2 = ""
+
+    # Reused text
 
     for x in range(len(new_str)):
       if new_str[x][1] != 'black':
         if added != "":
           added = " ".join([added, "[...]"])
         added = " ".join([added, new_str[x][0]])
+        added2 = " ".join([added2, new_str[x][0]])
       else:
         if reuse != "":
           reuse = " ".join([reuse, "[...]"])
         reuse = " ".join([reuse, new_str[x][0]])
+        reuse2 = " ".join([reuse2, new_str[x][0]])
 
     for x in range(len(old_str)):
       if old_str[x][1] != 'black':
         if removed != "":
           removed = " ".join([removed, "[...]"])
         removed = " ".join([removed, old_str[x][0]])
+        removed2 = " ".join([removed2, old_str[x][0]])
 
-    clean_data = clean_data._append({'Statement ID':id_num,'New_Text':new,'Added':added, 'Reused':reuse, 'Terminated':removed, 'Old_Text':old},ignore_index=True)
+    # Counts
+
+    if new != "" and new != "nan":
+      new_wc = len(re.findall(r'\w+', new))
+    else:
+      new_wc = 0
+
+    if added2 != "" and added2 != "nan":
+      added_wc = len(re.findall(r'\w+', added2))
+    else:
+      added_wc = 0
+
+    if reuse2 != "" and reuse2 != "nan":
+      reuse_wc = len(re.findall(r'\w+', reuse2))
+    else:
+      reuse_wc = 0
+
+    if removed2 != "" and removed2 != "nan":
+      removed_wc = len(re.findall(r'\w+', removed2))
+    else:
+      removed_wc = 0
+
+    if old != "" and old != "nan":
+      old_wc = len(re.findall(r'\w+', old))
+    else:
+      old_wc = 0
+
+    # Reuse Calculations
+
+    if new_wc != 0:
+      rom_new = reuse_wc/new_wc
+    else:
+      rom_new = 0
+    if old_wc != 0:
+      rom_old = reuse_wc/old_wc
+    else:
+      rom_old = 0
+
+    if new_wc == 0 and old_wc == 0 :
+      jac_sim = 0
+    else:
+      jac_sim = reuse_wc/(new_wc + old_wc)
+
+
+    clean_data = clean_data._append({'Statement ID':id_num,nt:new,ntw: new_wc,'Added':added,'Added_WC': added_wc, 'Reused':reuse,'Reused_WC': reuse_wc, 'Terminated':removed,'Terminated_WC': removed_wc, ot:old, otw: old_wc, rmnt: rom_new, rmot: rom_old,'Jaccard_Similarity': jac_sim},ignore_index=True)
   return clean_data
 
 ##############
@@ -384,17 +448,20 @@ def reuse_dataset_to_dataset(data,id,new_year,old_year,l):
 
 ### Dataset Construction ###
 
-def construct_dataset(data,id,new_year,old_year): # data to load, position of the id column, position of the new_year column, position of the old_year column
+def construct_dataset(data,id,new_year,new_year_num,old_year,old_year_num): # data to load, position of the id column, position of the new_year column, year of the new_year column, position of the old_year column, year of the old_year column
+
+  nyn = 'y_'+ str(new_year_num)
+  oyn = 'y_'+ str(old_year_num)
 
   dataset = pd.DataFrame({'Statement ID' : [],
-                         'New_Year' : [],
-                         'Old_Year' : []})
+                         nyn : [],
+                         oyn : []})
 
   dataset['Statement ID']=data.iloc[:, id].apply(int)
-  dataset['New_Year']=data.iloc[:, new_year].apply(str)
-  dataset['Old_Year']=data.iloc[:, old_year].apply(str)
+  dataset[nyn]=data.iloc[:, new_year].apply(str)
+  dataset[oyn]=data.iloc[:, old_year].apply(str)
 
-  return dataset[['Statement ID','New_Year','Old_Year']]
+  return dataset[['Statement ID',nyn,oyn]]
 
 
 
@@ -844,3 +911,25 @@ def merge_over_time(new_df,old_df):
   matched_df.reset_index(drop=True, inplace=True)
   return matched_df
 
+### STRAINGHT MERGE ####
+def straight_merge(new_df,old_df):
+
+  n_suf = "_"+new_df.columns[1][:6]
+  o_suf = "_"+old_df.columns[1][:6]
+  
+  matched_df = new_df.join(old_df.drop(old_df.columns[1], axis=1), lsuffix=n_suf, rsuffix=o_suf)
+  
+  return matched_df
+
+### STRAINGHT MERGE Text Only ####
+def straight_merge_text_only(new_df,old_df):
+
+  small_new_df = new_df.iloc[:, [0,1,3,5,7]]
+  small_old_df = old_df.iloc[:, [1,3,5,7,9]]
+
+  n_suf = "_"+new_df.columns[1][:6]
+  o_suf = "_"+old_df.columns[1][:6]
+
+  matched_df = small_new_df.join(small_old_df, lsuffix=n_suf, rsuffix=o_suf)
+
+  return matched_df
