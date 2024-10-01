@@ -946,6 +946,18 @@ def straight_merge_text_only(new_df,old_df):
 ### UPLOAD FROM GOOGLE DRIVE ####
 
 def data_from_GD(file_name,tab_name):
+
+  # mount
+  from google.colab import auth
+  auth.authenticate_user()
+
+  import gspread
+  from google.auth import default
+  creds, _ = default()
+
+  gc = gspread.authorize(creds)
+
+  # real code
   worksheet = gc.open(file_name).worksheet(tab_name)
 
   # get_all_values gives a list of rows.
