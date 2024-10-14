@@ -933,7 +933,7 @@ def straight_merge(new_df,old_df):
   n_suf = "_"+new_df.columns[1][:6]
   o_suf = "_"+old_df.columns[1][:6]
   
-  matched_df = new_df.join(old_df.drop(old_df.columns[0].columns[0], axis=1), lsuffix=n_suf, rsuffix=o_suf)
+  matched_df = new_df.join(old_df.drop(old_df.columns[:1], axis=1), lsuffix=n_suf, rsuffix=o_suf)
   
   return matched_df
 
