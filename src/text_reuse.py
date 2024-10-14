@@ -365,7 +365,7 @@ def reuse_dataset_to_dataset(data,id,new_year,old_year,l):
 
   rmnt = ny+'_New_Ratio_of_Match'
   rmot = ny+'_Old_Ratio_of_Match'
-  njs = ny+'Jaccard_Similarity'
+  njs = ny+'_Jaccard_Similarity'
 
   clean_data = pd.DataFrame(columns = ['Statement ID', nt, ntw, na, naw, nr, nrw, nter, nterw, ot, otw, rmnt, rmot, njs])
 
