@@ -353,13 +353,21 @@ def reuse_dataset_to_dataset(data,id,new_year,old_year,l):
   nt = ny+'_Text'
   ntw = ny+'_Text_WC'
 
+  na = ny+'_Added'
+  naw = ny+'_Added_WC'
+  nr = ny+'_Reused'
+  nrw = ny+'_Reused_WC'
+  nter = ny+'_Terminated'
+  nterw = ny+'_Terminated_WC'
+
   ot = oy+'_Text'
   otw = oy+'_Text_WC'
 
-  rmnt = 'Ratio_of_Match_'+ny
-  rmot = 'Ratio_of_Match_'+oy
+  rmnt = ny+'_New_Ratio_of_Match'
+  rmot = ny+'_Old_Ratio_of_Match'
+  njs = ny+'Jaccard_Similarity'
 
-  clean_data = pd.DataFrame(columns = ['Statement ID',nt,ntw,'Added','Added_WC', 'Reused', 'Reused_WC', 'Terminated', 'Terminated_WC', ot, otw, rmnt, rmot,'Jaccard_Similarity'])
+  clean_data = pd.DataFrame(columns = ['Statement ID', nt, ntw, na, naw, nr, nrw, nter, nterw, ot, otw, rmnt, rmot, njs])
 
   for x in range(len(data)):
 
@@ -440,8 +448,7 @@ def reuse_dataset_to_dataset(data,id,new_year,old_year,l):
     else:
       jac_sim = reuse_wc/(new_wc + old_wc)
 
-
-    clean_data = clean_data._append({'Statement ID':id_num,nt:new,ntw: new_wc,'Added':added,'Added_WC': added_wc, 'Reused':reuse,'Reused_WC': reuse_wc, 'Terminated':removed,'Terminated_WC': removed_wc, ot:old, otw: old_wc, rmnt: rom_new, rmot: rom_old,'Jaccard_Similarity': jac_sim},ignore_index=True)
+    clean_data = clean_data._append({'Statement ID':id_num,nt:new,ntw: new_wc, na:added, naw: added_wc, nr:reuse, nrw: reuse_wc, nter:removed, nterw: removed_wc, ot:old, otw: old_wc, rmnt: rom_new, rmot: rom_old, njs: jac_sim},ignore_index=True)
   return clean_data
 
 ##############
