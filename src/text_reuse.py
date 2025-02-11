@@ -446,7 +446,7 @@ def reuse_dataset_to_dataset(data,id,new_year,old_year,l):
     if new_wc == 0 and old_wc == 0 :
       jac_sim = 0
     else:
-      jac_sim = reuse_wc/(new_wc + old_wc)
+      jac_sim = reuse_wc/(added_wc + reuse_wc + removed_wc)
 
     clean_data = clean_data._append({'Statement ID':id_num,nt:new,ntw: new_wc, na:added, naw: added_wc, nr:reuse, nrw: reuse_wc, nter:removed, nterw: removed_wc, ot:old, otw: old_wc, rmnt: rom_new, rmot: rom_old, njs: jac_sim},ignore_index=True)
   return clean_data
