@@ -11,6 +11,17 @@ import numpy as np
 ### Definitions ###
 ###################
 
+### Print in Color ###
+
+from IPython.display import HTML as html_print
+from IPython.display import display
+
+def cstr(s, color='black'):
+    return "<text style=color:{}>{}</text>".format(color, s)
+
+def print_color(t):
+    display(html_print(' '.join([cstr(ti, color=ci) for ti,ci in t])))
+
 ### Identify Reuse ###
 
 def id_reuse(str1,str2,l):
